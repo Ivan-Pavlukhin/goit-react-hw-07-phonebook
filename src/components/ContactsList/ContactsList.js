@@ -1,33 +1,45 @@
+import { Component } from "react";
 import PropTypes from "prop-types";
 import style from "./ContactsList.module.css";
 import { connect } from "react-redux";
-import actions from "../../redux/phonebook/phonebook-actions"
-const ContactsList = ({ contactsList, onClick }) => {
-  return (
-    <>
-      <ul className={style.list}>
-        {contactsList && contactsList.map((item) => (
-          <li key={item.id} className={style.item}>
-            <span>
-              {item.name}: {item.number}
-            </span>
-            <button
-              className={style.list__button}
-              onClick={() => onClick(item.id)}
-            >
-              Delete
-            </button>
-          </li>
-        ))}
-      </ul>
+import { phonebookSelectors, phonebookOperations } from "../../redux/phonebook"
+
+class ContactsList extends Component {
+
+  componentDidMount() {
+    this.props.fetchContacts()
+  }
+
+  render() {
+    return(
+      <>
+        <ul className={style.list}>
+          
+          {this.props.isLoading && <h1>Loading...</h1>}
+          {this.props.contactsList && this.props.contactsList.map((item) => (
+            <li key={item.id} className={style.item}>
+              <span>
+                {item.name}: {item.number}
+              </span>
+              <button
+                className={style.list__button}
+                onClick={() => this.props.onClick(item.id)}
+              >
+                Delete
+              </button>
+            </li>
+          ))}
+        </ul>
     </>
   );
+  }
+  
 };
 
 ContactsList.propTypes = {
   contactsList: PropTypes.arrayOf(
     PropTypes.shape({
-      id: PropTypes.string.isRequired,
+      id: PropTypes.number.isRequired,
       name: PropTypes.string.isRequired,
       number: PropTypes.string.isRequired,
     })
@@ -35,20 +47,19 @@ ContactsList.propTypes = {
   onClick: PropTypes.func.isRequired
 };
 
-
 const findContacts = (filter, contacts) => {
-    const normalizedFilter = filter.toLowerCase();
-    return contacts.filter((contact) =>
-      contact.name.toLowerCase().includes(normalizedFilter)
-    );
-  };
+    
+};
 
-const mapPropsToState = ({filter, contacts}) => ({
-  contactsList: findContacts(filter, contacts)
+
+const mapPropsToState = (state) => ({
+  contactsList: phonebookSelectors.getVisibleContacts(state),
+  isLoading: phonebookSelectors.getIsLoading(state)
 })
 
 const mapDispatchToProps = dispatch => ({
-  onClick: id => dispatch(actions.deleteContact(id))
+  fetchContacts: () => dispatch(phonebookOperations.fetchContacts()),
+  onClick: id => dispatch(phonebookOperations.deleteContact(id))
 })
 
 export default connect(mapPropsToState, mapDispatchToProps)(ContactsList)

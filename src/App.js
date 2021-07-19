@@ -1,13 +1,38 @@
-import { Component } from "react";
-import { v4 as uuidv4 } from "uuid";
 import AddContact from "./components/AddContact/AddContact";
 import ContactsList from "./components/ContactsList/ContactsList";
 import FindContacts from "./components/FindContacts/FindContacts";
 import style from "./App.module.css";
 import { connect } from "react-redux";
-import actions from "./redux/phonebook/phonebook-actions"
+import { phonebookSelectors, phonebookOperations, findContacts } from "./redux/phonebook"
 
-function App({contacts, filter, addContact, changeFilter, deleteContact}){
+function App({ contacts, filter, addContact, changeFilter, deleteContact }) {
+
+  return (
+    <div className={style.wrapper}>
+      <h1>Phonebook</h1>
+      <AddContact />
+      <FindContacts value={filter} onChange={changeFilter} />
+      <ContactsList
+        // contactsList={visibleContacts}
+        onClick={deleteContact}
+      />
+    </div>
+  );
+
+}
+
+const mapPropsToState = state => ({
+  contacts: phonebookSelectors.getContacts(state),
+  filter: phonebookSelectors.getFilter(state),
+})
+
+const mapDispatchToState = dispatch => ({
+  changeFilter: ({ filter }) => dispatch(findContacts({ filter })),
+  deleteContact: ({ id }) => dispatch(phonebookOperations.deleteContact({ id }))
+})
+
+export default connect(mapPropsToState, mapDispatchToState)(App)
+
   // state = {
   //   contacts: [ { id: "id-1", name: "Rosie Simpson", number: "459-12-56" },
   //     { id: "id-2", name: "Hermione Kline", number: "443-89-12" },
@@ -30,7 +55,7 @@ function App({contacts, filter, addContact, changeFilter, deleteContact}){
   //   if (prevContacts !== nextContacts) {
   //      localStorage.setItem('contacts', JSON.stringify(nextContacts))
   //   }
-   
+
   // }
 
   // addContact = ({ name, number }) => {
@@ -65,30 +90,5 @@ function App({contacts, filter, addContact, changeFilter, deleteContact}){
   //   }));
   // };
 
-  
+
     // const visibleContacts = this.findContacts();
-    return (
-      <div className={style.wrapper}>
-        <h1>Phonebook</h1>
-        <AddContact />
-        <FindContacts value={filter} onChange={changeFilter} />
-        <ContactsList
-          // contactsList={visibleContacts}
-          onClick={deleteContact}
-        />
-      </div>
-    );
-  
-}
-
-const mapPropsToState = state => ({
-  contacts: state.contacts,
-  filter: state.filter,
-})
-
-const mapDispatchToState = dispatch => ({
-  changeFilter: ({ filter }) => dispatch(actions.findContacts({ filter })),
-  deleteContact: ({id}) => dispatch(actions.deleteContact({id}))
-})
-
-export default connect(mapPropsToState, mapDispatchToState)(App)

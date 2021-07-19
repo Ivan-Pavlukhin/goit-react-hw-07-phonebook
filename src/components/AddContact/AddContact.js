@@ -1,9 +1,8 @@
 import { Component } from "react";
-import  PropTypes  from "prop-types";
+import PropTypes from "prop-types";
 import style from "./AddContact.module.css";
 import { connect } from "react-redux";
-import actions from "../../redux/phonebook/phonebook-actions"
-
+import { phonebookSelectors, phonebookOperations } from "../../redux/phonebook"
 const INITIAL_STATE = {
   name: "",
   number: "",
@@ -73,7 +72,7 @@ class AddContact extends Component {
 AddContact.propTypes = {
   contacts: PropTypes.arrayOf(
     PropTypes.shape({
-      id: PropTypes.string.isRequired,
+      id: PropTypes.number.isRequired,
       name: PropTypes.string.isRequired,
       number: PropTypes.string.isRequired,
     })
@@ -82,11 +81,11 @@ AddContact.propTypes = {
 };
 
 const mapPropsToState = state => ({
-  contacts: state.contacts
+  contacts: phonebookSelectors.getContacts(state)
 })
 
 const mapDispatchToProps = dispatch => ({
-  onSubmit: contact => dispatch(actions.addContact(contact)),
+  onSubmit: contact => dispatch(phonebookOperations.addContact(contact)),
 })
 
 export default connect(mapPropsToState, mapDispatchToProps)(AddContact)
